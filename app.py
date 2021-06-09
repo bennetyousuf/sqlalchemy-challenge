@@ -51,29 +51,26 @@ def precipitation():
     """Return a list of precipitation (prcp)and date (date) data"""
     
     # Create new variable to store results from query to Measurement table for prcp and date columns
-    precipitation_results = session.query(Measurement.prcp, Measurement.date).all()
+    precipitation_query_results = session.query(Measurement.prcp, Measurement.date).all()
 
     # Close session
     session.close()
 
     # Create a dictionary from the row data and append to a list of all_passengers
-        #1. CREATE AN EMPTY LIST OF all_passengers (WHICH YOU'LL WANT IN DICTIONARY FORM)
-        #2. CREATE A FORMAT SAYING FOR THOSE 3 COLUMNS IN VAR "results" (WHICH = YOUR SQLALCHEMY QUERY):
-            #CREATE AN EMPTY DICTIONARY CALL passenger_dict: 
-            #   "NAME" IN DICT : VALUE NAME FROM VAR results, "AGE":AGE, "SEX":SEX
-        #3. APPENND RESULTS FROM passenger_dict 
-        #   (AFTER YOU CREATE THE DICT W KEY/VALUE PAIRS) TO EMPTY LIST all_passengers
-            # NOTE: BE SURE TO APPEND WITHIN THE FOR LOOP (1 INDENT AFTER FOR) OR ELSE THE VALUES TO APPEND
-            #  WONT EXIST 
-        # 4. RETURN JSON FORMAT OF all_passengers
-    precipitation_results = []
-    for prcp, date in precipitation_results:
+        # 1. Create an empty list of precipitation query values 
+        # 2. Create for loop to iterate through query results (precipitation_query_results) 
+        # 3. Create dictionary with key "precipitation" set to prcp from precipitation_query_results and key "date" to date from precipitation_query_results
+        # 4. Append values from precipitation_dict to your original empty list precipitation_query_values 
+        # 5. Return JSON format of your new list that now contains the dictionary of prcp and date values to your browser
+    
+    precipitaton_query_values = []
+    for prcp, date in precipitation_query_results:
         precipitation_dict = {}
         precipitation_dict["precipitation"] = prcp
         precipitation_dict["date"] = date
-        precipitation_results.append(precipitation_dict)
+        precipitaton_query_values.append(precipitation_dict)
 
-    return jsonify(precipitation_results) 
+    return jsonify(precipitaton_query_values) 
 
 if __name__ == '__main__':
     app.run(debug=True) 
