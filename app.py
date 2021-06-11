@@ -142,12 +142,7 @@ def tobs():
         dates_tobs_dict["station"] = station
         dates_tobs_last_year_query_values.append(dates_tobs_dict)
         
-    return jsonify(dates_tobs_last_year_query_values) 
-  
-
-    
-
-    return jsonify (last_year_query_results) 
+    return jsonify(dates_tobs_last_year_query_values)
 
 if __name__ == '__main__':
     app.run(debug=True) 
