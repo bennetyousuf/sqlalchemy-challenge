@@ -62,7 +62,7 @@ Student assignment using sqlalchemy to query and analyze climate data, and using
 - When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
 - When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
 
-- Hints
-- You will need to join the station and measurement tables for some of the queries.
-- Use Flask jsonify to convert your API data into a valid JSON response object.
+- Hints:
+-   You will need to join the station and measurement tables for some of the queries.
+-   Use Flask jsonify to convert your API data into a valid JSON response object.
 
