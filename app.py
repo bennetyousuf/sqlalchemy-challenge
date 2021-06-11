@@ -4,6 +4,7 @@
 import numpy as np
 
 import sqlalchemy
+import datetime as dt
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
@@ -30,6 +31,8 @@ Station = Base.classes.station
 app = Flask(__name__)
 
 # Create Flask Routes 
+
+# Create root route
 @app.route("/")
 def welcome():
     """List all available api routes."""
@@ -43,6 +46,7 @@ def welcome():
 
     )
 
+# Create a route that queries precipiation levels and dates and returns a dictionary using date as key and precipation as value
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     # Create our session (link) from Python to the DB
@@ -71,6 +75,79 @@ def precipitation():
         precipitaton_query_values.append(precipitation_dict)
 
     return jsonify(precipitaton_query_values) 
+
+# Create a route that returns a JSON list of stations from the database
+@app.route("/api/v1.0/station")
+def station(): 
+    session = Session(engine)
+
+    station_query_results = session.query(Station.station).all()
+
+    session.close()  
+
+    return jsonify(station_query_results) 
+
+# Create a route that queries the dates and temp observed for the most active station for the last year of data and returns a JSON list of the temps observed for the last year
+@app.route("/api/v1.0/tobs") 
+def tobs():
+    session = Session(engine)
+
+    # Create query to find the last date in the database
+    
+    last_year_query_results = session.query(Measurement.date).\
+        order_by(Measurement.date.desc()).first() 
+
+    print(last_year_query_results)
+    # last_year_date returns row ('2017-08-23',), use this to create a date time object to find start query date 
+    
+    # check to see if last year was correctly returned by creating dictionary to return last year value to browser in JSON format
+    last_year_query_values = []
+    for date in last_year_query_results:
+        last_year_dict = {}
+        last_year_dict["date"] = date
+        last_year_query_values.append(last_year_dict) 
+    print(last_year_query_values)
+    # returns: [{'date': '2017-08-23'}]
+
+    # Create query_start_date by finding the difference between date time object of "2017-08-23" - 365 days
+    query_start_date = dt.date(2017, 8, 23)-dt.timedelta(days =365) 
+    print(query_start_date) 
+    # returns: 2016-08-23 
+
+    # Create query to find most active station in the database 
+
+    active_station= session.query(Measurement.station, func.count(Measurement.station)).\
+        order_by(func.count(Measurement.station).desc()).\
+        group_by(Measurement.station).first()
+    most_active_station = active_station[0] 
+
+    session.close() 
+     # active_station returns: ('USC00519281', 2772), index to get the first position to isolate most active station number
+    print(most_active_station)
+    # returns: USC00519281  
+
+    # Create a query to find dates and tobs for the most active station (USC00519281) within the last year (> 2016-08-23)
+
+    dates_tobs_last_year_query_results = session.query(Measurement.date, Measurement.tobs, Measurement.station).\
+        filter(Measurement.date > query_start_date).\
+        filter(Measurement.station == most_active_station) 
+    
+
+    #Create an empty list of dates & tobs from query, that will be appended with dictionary key, value pairs for date, tobs, and station number queried above
+    dates_tobs_last_year_query_values = []
+    for date, tobs, station in dates_tobs_last_year_query_results:
+        dates_tobs_dict = {}
+        dates_tobs_dict["date"] = date
+        dates_tobs_dict["tobs"] = tobs
+        dates_tobs_dict["station"] = station
+        dates_tobs_last_year_query_values.append(dates_tobs_dict)
+        
+    return jsonify(dates_tobs_last_year_query_values) 
+  
+
+    
+
+    return jsonify (last_year_query_results) 
 
 if __name__ == '__main__':
     app.run(debug=True) 
